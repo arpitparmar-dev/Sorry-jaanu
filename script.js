@@ -1,110 +1,141 @@
 
 document.addEventListener("DOMContentLoaded", () => {
+
     const pages = [...document.querySelectorAll(".page")];
-    const indicator = document.getElementById("pageIndicator");
-    const heartsContainer = document.getElementById("hearts");
-    const finalMessage = document.getElementById("finalMessage");
+    const pageNumber = document.getElementById("pageNumber");
+    const petalsContainer = document.getElementById("petals");
+    const hugMessage = document.getElementById("hugMessage");
+    const envelope = document.getElementById("envelope");
 
     let currentPage = 0;
 
-    function showPage(pageId) {
-        const nextIndex = pages.findIndex(page => page.id === pageId);
-        if (nextIndex === -1) return;
+    // PAGE NAVIGATION
+    function showPage(id) {
+        const index = pages.findIndex(page => page.id === id);
 
-        currentPage = nextIndex;
+        if (index === -1) return;
 
-        pages.forEach((page, index) => {
-            page.classList.toggle("active", index === currentPage);
+        currentPage = index;
+
+        pages.forEach((page, i) => {
+            page.classList.toggle("active", i === index);
         });
 
-        indicator.textContent = `${currentPage + 1} / ${pages.length}`;
-        finalMessage.textContent = "";
+        pageNumber.textContent =
+            `${String(index + 1).padStart(2, "0")} / ${String(pages.length).padStart(2, "0")}`;
 
-        window.scrollTo({ top: 0, behavior: "smooth" });
+        hugMessage.textContent = "";
+
+        window.scrollTo({
+            top: 0,
+            behavior: "smooth"
+        });
+
+        if (id === "page1") {
+            envelope.classList.remove("open");
+        }
     }
 
-    // Next-page buttons
+    // NEXT PAGE
     document.querySelectorAll("[data-next]").forEach(button => {
         button.addEventListener("click", () => {
-            showPage(button.dataset.next);
+
+            if (button.dataset.next === "page2") {
+                envelope.classList.add("open");
+            }
+
+            setTimeout(() => {
+                showPage(button.dataset.next);
+            }, 250);
+
         });
     });
 
-    // Previous-page buttons
+    // PREVIOUS PAGE
     document.querySelectorAll("[data-prev]").forEach(button => {
         button.addEventListener("click", () => {
             showPage(button.dataset.prev);
         });
     });
 
-    // Create floating hearts in the background
-    const heartSymbols = ["♡", "♥", "💕", "💗", "💖"];
+    // FALLING ROSE PETALS
+    function createPetal() {
 
-    function createFloatingHeart() {
-        const heart = document.createElement("span");
-        heart.className = "floating-heart";
-        heart.textContent =
-            heartSymbols[Math.floor(Math.random() * heartSymbols.length)];
+        const petal = document.createElement("div");
+        petal.className = "petal";
 
-        heart.style.left = `${Math.random() * 100}%`;
-        heart.style.fontSize = `${14 + Math.random() * 19}px`;
+        petal.style.left = Math.random() * 100 + "vw";
 
-        const duration = 7 + Math.random() * 7;
-        heart.style.animationDuration = `${duration}s`;
+        const duration = 9 + Math.random() * 9;
 
-        heartsContainer.appendChild(heart);
+        petal.style.animationDuration = duration + "s";
+        petal.style.animationDelay = Math.random() * 2 + "s";
 
-        setTimeout(() => heart.remove(), duration * 1000);
+        petalsContainer.appendChild(petal);
+
+        setTimeout(() => {
+            petal.remove();
+        }, (duration + 2) * 1000);
     }
 
-    // Start with a few hearts and continue gently
-    for (let i = 0; i < 8; i++) {
-        setTimeout(createFloatingHeart, i * 450);
+    for (let i = 0; i < 12; i++) {
+        setTimeout(createPetal, i * 450);
     }
 
-    setInterval(createFloatingHeart, 1100);
+    setInterval(createPetal, 1000);
 
-    // Make a heart burst for the virtual hug
-    function createHeartBurst() {
-        const symbols = ["💗", "💕", "❤️", "💖", "🫶"];
+    // HEART ANIMATION
+    function heartBurst() {
 
-        for (let i = 0; i < 28; i++) {
+        const symbols = ["♥", "♡", "❤", "💗"];
+
+        for (let i = 0; i < 35; i++) {
+
             const heart = document.createElement("span");
+
             heart.className = "burst-heart";
+
             heart.textContent =
                 symbols[Math.floor(Math.random() * symbols.length)];
 
-            heart.style.left = `${35 + Math.random() * 30}%`;
-            heart.style.top = `${40 + Math.random() * 20}%`;
-            heart.style.fontSize = `${17 + Math.random() * 17}px`;
-            heart.style.setProperty("--dx", `${(Math.random() - 0.5) * 420}px`);
-            heart.style.setProperty("--dy", `${-60 - Math.random() * 300}px`);
-            heart.style.setProperty("--rot", `${Math.random() * 100 - 50}deg`);
+            heart.style.left = "50%";
+            heart.style.top = "55%";
+
+            heart.style.color =
+                Math.random() > 0.5 ? "#d8b77b" : "#c97887";
+
+            heart.style.setProperty(
+                "--dx",
+                (Math.random() - 0.5) * 450 + "px"
+            );
+
+            heart.style.setProperty(
+                "--dy",
+                (-80 - Math.random() * 350) + "px"
+            );
 
             document.body.appendChild(heart);
+
             setTimeout(() => heart.remove(), 1000);
         }
     }
 
-    // Talk button: shows a gentle, no-pressure message
-    document.getElementById("talkBtn").addEventListener("click", () => {
-        finalMessage.textContent =
-            "Whenever you're ready, my love. I'll listen, honestly and patiently. ❤️";
-        createHeartBurst();
+    // VIRTUAL HUG
+    document.getElementById("hugButton").addEventListener("click", () => {
+
+        hugMessage.textContent =
+            "A warm hug, a thousand kisses, and all my love. ♥";
+
+        heartBurst();
+
     });
 
-    // Virtual hug button
-    document.getElementById("hugBtn").addEventListener("click", () => {
-        finalMessage.textContent =
-            "Sending you the biggest, warmest virtual hug ever! 🫂💕";
-        createHeartBurst();
-    });
-
-    // Restart the experience
-    document.getElementById("restartBtn").addEventListener("click", () => {
+    // RESTART WEBSITE
+    document.getElementById("restartButton").addEventListener("click", () => {
         showPage("page1");
     });
 
-    // Initialize the first page
+    // INITIALIZE
     showPage("page1");
+
 });
