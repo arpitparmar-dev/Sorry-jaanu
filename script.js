@@ -26,10 +26,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
         hugMessage.textContent = "";
 
-        window.scrollTo({
-            top: 0,
-            behavior: "smooth"
-        });
+        window.scrollTo({ top: 0, behavior: "smooth" });
+
+        // Move focus to the new page for keyboard / screen-reader users
+        pages[index].setAttribute("tabindex", "-1");
+        pages[index].focus({ preventScroll: true });
 
         if (id === "page1") {
             envelope.classList.remove("open");
@@ -78,11 +79,31 @@ document.addEventListener("DOMContentLoaded", () => {
         }, (duration + 2) * 1000);
     }
 
-    for (let i = 0; i < 12; i++) {
-        setTimeout(createPetal, i * 450);
+    if (!window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+        for (let i = 0; i < 12; i++) {
+            setTimeout(createPetal, i * 450);
+        }
     }
 
-    setInterval(createPetal, 1000);
+    // Petals: skip for reduced-motion users, pause when the tab is hidden
+    const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    let petalTimer = null;
+
+    function startPetals() {
+        if (reduceMotion || petalTimer) return;
+        petalTimer = setInterval(createPetal, 1200);
+    }
+
+    function stopPetals() {
+        clearInterval(petalTimer);
+        petalTimer = null;
+    }
+
+    document.addEventListener("visibilitychange", () => {
+        document.hidden ? stopPetals() : startPetals();
+    });
+
+    startPetals();
 
     // HEART ANIMATION
     function heartBurst() {
